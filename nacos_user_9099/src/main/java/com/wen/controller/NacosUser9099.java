@@ -1,5 +1,6 @@
 package com.wen.controller;
 
+import com.wen.clients.ProductClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 7wen
@@ -27,9 +29,12 @@ public class NacosUser9099 {
     private DiscoveryClient discoveryClient;
     @Autowired
     private LoadBalancerClient loadBalancerClient;
+    @Autowired
+    private ProductClient productClient;
 
     @GetMapping("/user/find")
     public String getProductService(@RequestParam("id") String id) {
+
         //第一种调用方式 restTemplate
 //        String product = restTemplate.getForObject("http://localhost:9098/product/find/{id}", String.class, id);
 //        log.info(product);
@@ -45,8 +50,11 @@ public class NacosUser9099 {
 //        String product = restTemplate.getForObject(serviceInstance.getUri() + "/product/find/{id}", String.class, id);
 //        log.info("第四种服务:与第三种服务地址配合[{}]",product);
         //第五种方式 与负载均衡合二为一 在restTemplate上面加入@LoadBalanced
-        String product = restTemplate.getForObject("http://product-server/product/find/{id}", String.class, id);
-        log.info("第五种调用方式:[{}]",product);
-        return product;
+//        String product = restTemplate.getForObject("http://product-server/product/find/{id}", String.class, id);
+//        log.info("第五种调用方式:[{}]",product);
+        //第六种调用方式 接口调用 openFeign
+        Map<String, Object> product = productClient.find(id);
+        log.info("第六种调用方式:OpenFeign[{}]",product);
+        return product.toString();
     }
 }
